@@ -10,7 +10,9 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 @Constraint(validatedBy = ReleaseDateValidator.class)
 public @interface ReleaseDate {
-    String message() default "Дата релиза не может быть раньше 28 декабря 1895 года";
+    String value() default "1895-12-28";
+
+    String message() default "Дата релиза не может быть раньше {value}";
 
     Class<?>[] groups() default {};
 

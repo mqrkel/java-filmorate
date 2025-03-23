@@ -25,7 +25,7 @@ public record RequestUserDto(
         String name,
 
         @JsonFormat(pattern = "yyyy-MM-dd")
-        @Past
+        @Past(message = "Дата рождения не может быть в будущем")
         LocalDate birthday
 ) {
     public String getValidName() {

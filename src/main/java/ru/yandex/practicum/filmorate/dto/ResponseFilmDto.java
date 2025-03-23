@@ -12,4 +12,3 @@ public record ResponseFilmDto(
         LocalDate releaseDate,
         int duration) {
 }
-
