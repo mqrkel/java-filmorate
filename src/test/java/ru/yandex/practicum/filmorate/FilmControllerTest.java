@@ -128,7 +128,7 @@ class FilmControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(filmDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0]").value("Название фильма не может быть пустым"));
+                .andExpect(jsonPath("$.errors[0]").value("Название не может быть пустым"));
     }
 
     @Test
@@ -173,7 +173,7 @@ class FilmControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(filmDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0]").value("Дата выпуска фильма должна быть позже 28 декабря 1895"));
+                .andExpect(jsonPath("$.errors[0]").value("Дата релиза не может быть раньше 1895-12-28"));
     }
 
     @Test
@@ -190,7 +190,7 @@ class FilmControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(filmDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0]").value("Длительность фильма не может быть отрицательной"));
+                .andExpect(jsonPath("$.errors[0]").value("Продолжительность должна быть положительным числом"));
     }
 
     @Test
@@ -207,7 +207,7 @@ class FilmControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(filmDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0]").value("Длительность фильма не может быть нулевой"));
+                .andExpect(jsonPath("$.errors[0]").value("Продолжительность должна быть положительным числом"));
     }
 
     @Test

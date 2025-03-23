@@ -28,6 +28,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFoundException(NotFoundException ex) {
-        return ResponseEntity.status(404).body(Map.of("error", ex.getMessage()));
+        return ResponseEntity.status(404).body(Map.of("errors", List.of(ex.getMessage())));
     }
 }
