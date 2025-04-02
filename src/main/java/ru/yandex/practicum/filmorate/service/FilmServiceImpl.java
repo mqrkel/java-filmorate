@@ -27,7 +27,7 @@ public class FilmServiceImpl implements FilmService {
     public ResponseFilmDto createFilm(RequestFilmDto filmDto) {
         log.info("Попытка создать фильм: {}", filmDto);
         try {
-            Film film = FilmMapper.converToFilm(filmDto);
+            Film film = FilmMapper.convertToFilm(filmDto);
             filmStorage.addFilm(film);
             log.info("Фильм с id={} успешно создан", film.getId());
             return FilmMapper.convertToResponseFilmDto(film);
@@ -62,5 +62,41 @@ public class FilmServiceImpl implements FilmService {
         return films.stream()
                 .map(FilmMapper::convertToResponseFilmDto)
                 .toList();
+    }
+
+    @Override
+    public void addLike(Integer filmId, Integer userId) {
+        log.info("Добавление лайка фильму с id={} от пользователя id={}", filmId, userId);
+        boolean result = filmStorage.addLike(filmId, userId)
+                .orElseThrow(() -> new NotFoundException("Фильм с id=%d или пользователь с id=%d не найден".formatted(filmId, userId)));
+        if (result) {
+            log.info("Лайк успешно добавлен.");
+        }
+    }
+
+    @Override
+    public void removeLike(Integer filmId, Integer userId) {
+        log.info("Удаление лайка у фильма с id={} от пользователя id={}", filmId, userId);
+        boolean result = filmStorage.removeLike(filmId, userId)
+                .orElseThrow(() -> new NotFoundException("Фильм с id=%d или пользователь с id=%d не найден".formatted(filmId, userId)));
+        if (result) {
+            log.info("Лайк успешно удалён.");
+        }
+    }
+
+    @Override
+    public List<ResponseFilmDto> getPopularFilms(Integer count) {
+        log.info("Запрос популярных фильмов, количество: {}", count);
+        return filmStorage.getPopularFilms(count).stream()
+                .map(FilmMapper::convertToResponseFilmDto)
+                .toList();
+    }
+
+    @Override
+    public ResponseFilmDto getFilm(Integer id) {
+        log.info("Получение фильма с id={}", id);
+        Film film = filmStorage.getFilm(id)
+                .orElseThrow(() -> new NotFoundException("Фильм с id=%d не найден".formatted(id)));
+        return FilmMapper.convertToResponseFilmDto(film);
     }
 }

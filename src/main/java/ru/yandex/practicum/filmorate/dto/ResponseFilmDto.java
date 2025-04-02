@@ -10,5 +10,6 @@ public record ResponseFilmDto(
         String name,
         String description,
         LocalDate releaseDate,
-        int duration) {
+        int duration,
+        int likes) {
 }

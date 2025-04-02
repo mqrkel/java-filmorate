@@ -65,4 +65,69 @@ public class UserServiceImpl implements UserService {
                 .map(UserMapper::convertToResponseUserDto)
                 .toList();
     }
+
+    @Override
+    public void addFriend(Integer userId, Integer friendId) {
+        log.info("Попытка добавить в друзья: userId={}, friendId={}", userId, friendId);
+        boolean added = userStorage.addFriend(userId, friendId)
+                .orElseThrow(() -> {
+                    final String message = "Ошибка при добавлении в друзья. Проверьте корректность ID";
+                    log.warn(message);
+                    return new NotFoundException(message);
+                });
+        if (added) {
+            log.info("Пользователь с id={} добавил в друзья пользователя с id={}", userId, friendId);
+        }
+    }
+
+    @Override
+    public void removeFriend(Integer userId, Integer friendId) {
+        log.info("Попытка удалить из друзей: userId={}, friendId={}", userId, friendId);
+        boolean removed = userStorage.removeFriend(userId, friendId)
+                .orElseThrow(() -> {
+                    final String message = "Ошибка при удалении из друзей. Проверьте корректность ID";
+                    log.warn(message);
+                    return new NotFoundException(message);
+                });
+
+        if (removed) {
+            log.info("Пользователь с id={} удалил из друзей пользователя с id={}", userId, friendId);
+        }
+    }
+
+    @Override
+    public List<ResponseUserDto> getUserFriends(Integer userId) {
+        log.info("Получение списка друзей пользователя с id={}", userId);
+        return userStorage.getUserFriends(userId)
+                .orElseThrow(() -> {
+                    final String message = "Пользователь с id=%d не найден".formatted(userId);
+                    log.warn(message);
+                    return new NotFoundException(message);
+                })
+                .stream()
+                .map(UserMapper::convertToResponseUserDto)
+                .toList();
+    }
+
+    @Override
+    public List<ResponseUserDto> getCommonFriends(Integer userId, Integer friendId) {
+        log.info("Получение общих друзей между userId={} и friendId={}", userId, friendId);
+        return userStorage.getCommonFriends(userId, friendId)
+                .orElseThrow(() -> {
+                    final String message = "Один из пользователей не найден";
+                    log.warn(message);
+                    return new NotFoundException(message);
+                })
+                .stream()
+                .map(UserMapper::convertToResponseUserDto)
+                .toList();
+    }
+
+    @Override
+    public ResponseUserDto getUser(Integer id) {
+        log.info("Получение пользователя с id={}", id);
+        User user = userStorage.getUserById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id=%d не найден".formatted(id)));
+        return UserMapper.convertToResponseUserDto(user);
+    }
 }

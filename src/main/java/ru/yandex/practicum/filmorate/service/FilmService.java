@@ -12,4 +12,12 @@ public interface FilmService {
     ResponseFilmDto updateFilm(RequestFilmWithIdDto filmDto);
 
     List<ResponseFilmDto> getAllFilms();
+
+    void addLike(Integer filmId, Integer userId);
+
+    void removeLike(Integer filmId, Integer userId);
+
+    List<ResponseFilmDto> getPopularFilms(Integer count);
+
+    ResponseFilmDto getFilm(Integer filmId);
 }

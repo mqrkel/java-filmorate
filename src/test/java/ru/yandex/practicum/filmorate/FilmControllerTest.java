@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -21,7 +21,8 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(FilmController.class)
 class FilmControllerTest {
@@ -229,5 +230,103 @@ class FilmControllerTest {
                         .content(objectMapper.writeValueAsString(filmDto)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errors[0]").value("Фильм не найден"));
+    }
+
+    @Test
+    @DisplayName("Получить фильм по ID")
+    void testGetFilmById() throws Exception {
+        ResponseFilmDto responseFilmDto = ResponseFilmDto.builder()
+                .id(1)
+                .name("Test Film")
+                .description("Description")
+                .releaseDate(LocalDate.of(2025, 3, 1))
+                .duration(120)
+                .build();
+
+        when(filmService.getFilm(1)).thenReturn(responseFilmDto);
+
+        mockMvc.perform(get("/films/{id}", 1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Test Film"));
+    }
+
+    @Test
+    @DisplayName("Получить фильм по некорректному ID")
+    void testGetFilmByInvalidId() throws Exception {
+        when(filmService.getFilm(999)).thenThrow(new NotFoundException("Фильм не найден"));
+
+        mockMvc.perform(get("/films/{id}", 999))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errors[0]").value("Фильм не найден"));
+    }
+
+    @Test
+    @DisplayName("Добавить лайк фильму")
+    void testLikeFilm() throws Exception {
+        mockMvc.perform(put("/films/{id}/like/{userId}", 1, 1))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("Удалить лайк фильма")
+    void testUnlikeFilm() throws Exception {
+        mockMvc.perform(delete("/films/{id}/like/{userId}", 1, 1))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("Получить популярные фильмы (позитивный тест)")
+    void testGetPopularFilms() throws Exception {
+        List<ResponseFilmDto> popularFilms = List.of(
+                ResponseFilmDto.builder()
+                        .id(1)
+                        .name("Popular Film")
+                        .description("Description")
+                        .releaseDate(LocalDate.of(2025, 3, 1))
+                        .duration(120)
+                        .build()
+        );
+
+        when(filmService.getPopularFilms(5)).thenReturn(popularFilms);
+
+        mockMvc.perform(get("/films/popular").param("count", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Popular Film"));
+    }
+
+    @Test
+    @DisplayName("Получить популярные фильмы с некорректным значением")
+    void testGetPopularFilmsWithInvalidValue() throws Exception {
+        mockMvc.perform(get("/films/popular").param("count", "-5"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Получить топ-10 популярных фильмов из 11 доступных")
+    void testGetTop10PopularFilms() throws Exception {
+        List<ResponseFilmDto> allFilms = List.of(
+                ResponseFilmDto.builder().id(1).name("Film 1").likes(110).build(),
+                ResponseFilmDto.builder().id(2).name("Film 2").likes(100).build(),
+                ResponseFilmDto.builder().id(3).name("Film 3").likes(90).build(),
+                ResponseFilmDto.builder().id(4).name("Film 4").likes(80).build(),
+                ResponseFilmDto.builder().id(5).name("Film 5").likes(70).build(),
+                ResponseFilmDto.builder().id(6).name("Film 6").likes(60).build(),
+                ResponseFilmDto.builder().id(7).name("Film 7").likes(50).build(),
+                ResponseFilmDto.builder().id(8).name("Film 8").likes(40).build(),
+                ResponseFilmDto.builder().id(9).name("Film 9").likes(30).build(),
+                ResponseFilmDto.builder().id(10).name("Film 10").likes(20).build(),
+                ResponseFilmDto.builder().id(11).name("Film 11").likes(10).build()
+        );
+
+        when(filmService.getPopularFilms(10)).thenReturn(allFilms.subList(0, 10));
+
+        mockMvc.perform(get("/films/popular").param("count", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(10))
+                .andExpect(jsonPath("$[0].name").value("Film 1"))
+                .andExpect(jsonPath("$[0].likes").value(110))
+                .andExpect(jsonPath("$[9].name").value("Film 10"))
+                .andExpect(jsonPath("$[9].likes").value(20));
     }
 }
