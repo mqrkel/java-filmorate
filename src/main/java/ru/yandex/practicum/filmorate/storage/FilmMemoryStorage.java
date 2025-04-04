@@ -12,12 +12,6 @@ public class FilmMemoryStorage implements FilmStorage {
 
     private final Map<Integer, Film> films = new HashMap<>();
     private final AtomicInteger idGenerator = new AtomicInteger(1);
-    private final UserMemoryStorage userMemoryStorage;
-
-    @Autowired
-    public FilmMemoryStorage(UserMemoryStorage userMemoryStorage) {
-        this.userMemoryStorage = userMemoryStorage;
-    }
 
     private Integer generateId() {
         return idGenerator.getAndIncrement();
@@ -46,7 +40,7 @@ public class FilmMemoryStorage implements FilmStorage {
 
     @Override
     public Optional<Boolean> addLike(Integer filmId, Integer userId) {
-        if (!checkId(filmId) || !checkUserExist(userId)) {
+        if (!checkId(filmId)) {
             return Optional.empty();
         }
         Film film = films.get(filmId);
@@ -56,7 +50,7 @@ public class FilmMemoryStorage implements FilmStorage {
 
     @Override
     public Optional<Boolean> removeLike(Integer filmId, Integer userId) {
-        if (!checkId(filmId) || !checkUserExist(userId)) {
+        if (!checkId(filmId)) {
             return Optional.empty();
         }
         Film film = films.get(filmId);
@@ -82,9 +76,5 @@ public class FilmMemoryStorage implements FilmStorage {
 
     private boolean checkId(Integer id) {
         return id != null && films.containsKey(id);
-    }
-
-    private boolean checkUserExist(Integer userId) {
-        return userMemoryStorage.getUserById(userId).isPresent();
     }
 }

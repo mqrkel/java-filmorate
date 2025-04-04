@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.exception.UpdateException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
 
@@ -18,9 +19,11 @@ import java.util.List;
 public class FilmServiceImpl implements FilmService {
 
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
-    public FilmServiceImpl(FilmStorage filmStorage) {
+    public FilmServiceImpl(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
     }
 
     @Override
@@ -33,7 +36,7 @@ public class FilmServiceImpl implements FilmService {
             return FilmMapper.convertToResponseFilmDto(film);
         } catch (Exception e) {
             log.error("Ошибка при создании фильма: {}. Причина: {}", filmDto, e.getMessage(), e);
-            throw new NotFoundException("Не удалось создать фильм: " + filmDto, e);
+            throw new IllegalArgumentException("Не удалось создать фильм: " + filmDto, e);
         }
     }
 
@@ -42,11 +45,12 @@ public class FilmServiceImpl implements FilmService {
         log.info("Попытка обновить фильм с id={}", filmDto.id());
         try {
             Film film = FilmMapper.convertToFilm(filmDto);
-            Film updatedFilm = filmStorage.updateFilm(film).orElseThrow(() -> {
-                final String msg = "Фильм с id= %d не найден".formatted(filmDto.id());
-                log.warn(msg);
-                return new NotFoundException(msg);
-            });
+            Film updatedFilm = filmStorage.updateFilm(film)
+                    .orElseThrow(() -> {
+                        final String msg = "Фильм с id= %d не найден".formatted(filmDto.id());
+                        log.warn(msg);
+                        return new NotFoundException(msg);
+                    });
             log.info("Фильм с id={} успешно обновлён: {}", filmDto.id(), updatedFilm);
             return FilmMapper.convertToResponseFilmDto(updatedFilm);
         } catch (Exception e) {
@@ -67,8 +71,16 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public void addLike(Integer filmId, Integer userId) {
         log.info("Добавление лайка фильму с id={} от пользователя id={}", filmId, userId);
+        if (userStorage.getUserById(userId).isEmpty()) {
+            log.warn("Не найден пользователь с id={}", userId);
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
         boolean result = filmStorage.addLike(filmId, userId)
-                .orElseThrow(() -> new NotFoundException("Фильм с id=%d или пользователь с id=%d не найден".formatted(filmId, userId)));
+                .orElseThrow(() -> {
+                    final String msg = "Фильм с id=%d не найден".formatted(filmId);
+                    log.warn(msg);
+                    return new NotFoundException("Фильм с id=%d не найден".formatted(filmId));
+                });
         if (result) {
             log.info("Лайк успешно добавлен.");
         }
@@ -76,9 +88,17 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public void removeLike(Integer filmId, Integer userId) {
-        log.info("Удаление лайка у фильма с id={} от пользователя id={}", filmId, userId);
+        log.info("Попытка удалить лайк у фильма с id={} от пользователя с id={}", filmId, userId);
+        if (userStorage.getUserById(userId).isEmpty()) {
+            log.warn("Не найден пользователь с id={}", userId);
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
         boolean result = filmStorage.removeLike(filmId, userId)
-                .orElseThrow(() -> new NotFoundException("Фильм с id=%d или пользователь с id=%d не найден".formatted(filmId, userId)));
+                .orElseThrow(() -> {
+                    final String msg = "Фильм с id=%d не найден".formatted(filmId);
+                    log.warn(msg);
+                    return new NotFoundException("Фильм с id=%d не найден".formatted(filmId));
+                });
         if (result) {
             log.info("Лайк успешно удалён.");
         }

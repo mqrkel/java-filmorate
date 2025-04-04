@@ -57,7 +57,7 @@ public class FilmController {
 
     @GetMapping("/popular")
     public List<ResponseFilmDto> getPopularFilms(@RequestParam(
-            name = "count", required = false, defaultValue = "10") @Positive Integer count) {
+            name = "count", defaultValue = "10") @Positive Integer count) {
         return filmService.getPopularFilms(count);
     }
 }
