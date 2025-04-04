@@ -42,10 +42,4 @@ public class GlobalExceptionHandler {
         log.warn("Constraint violation: {}", ex.getMessage());
         return ResponseEntity.badRequest().body(Map.of("errors", List.of(ex.getMessage())));
     }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex) {
-        log.error("Unexpected error: {}", ex.getMessage(), ex);
-        return ResponseEntity.internalServerError().body(Map.of("errors", List.of("Unexpected server error")));
-    }
 }
