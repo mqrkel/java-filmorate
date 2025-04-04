@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -35,5 +36,28 @@ public class FilmController {
     @PutMapping
     public ResponseFilmDto updateFilm(@Valid @RequestBody RequestFilmWithIdDto filmDto) {
         return filmService.updateFilm(filmDto);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseFilmDto getFilmById(@PathVariable @Positive Integer id) {
+        return filmService.getFilm(id);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void likeFilm(@PathVariable @Positive Integer id, @PathVariable Integer userId) {
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void unlikeFilm(@PathVariable @Positive Integer id, @PathVariable Integer userId) {
+        filmService.removeLike(id, userId);
+    }
+
+    @GetMapping("/popular")
+    public List<ResponseFilmDto> getPopularFilms(@RequestParam(
+            name = "count", defaultValue = "10") @Positive Integer count) {
+        return filmService.getPopularFilms(count);
     }
 }

@@ -18,10 +18,11 @@ public final class FilmMapper {
                 .description(updatedFilm.getDescription())
                 .releaseDate(updatedFilm.getReleaseDate())
                 .duration((int) updatedFilm.getDuration().toMinutes())
+                .likes(updatedFilm.getLikes())
                 .build();
     }
 
-    public static Film converToFilm(RequestFilmDto filmDto) {
+    public static Film convertToFilm(RequestFilmDto filmDto) {
         return Film.builder()
                 .name(filmDto.name())
                 .description(filmDto.description())
