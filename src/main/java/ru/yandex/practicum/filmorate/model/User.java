@@ -1,8 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -10,21 +9,22 @@ import java.util.Set;
 
 @Data
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = {"id", "login"})
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
-    private Integer id;
-    private String email;
-    private String login;
-    private String name;
-    private LocalDate birthday;
+    Integer id;
+    String email;
+    String login;
+    String name;
+    LocalDate birthday;
+    @Builder.Default
+    Set<Integer> friendshipIds = new HashSet<>();
+    @Builder.Default
+    Set<Integer> likedFilms = new HashSet<>();
 
-    private final Set<Integer> friendshipIds = new HashSet<>();
-
-    public void addFriendship(Integer friendshipId) {
-        friendshipIds.add(friendshipId);
-    }
-
-    public void removeFriendship(Integer friendshipId) {
-        friendshipIds.remove(friendshipId);
+    public String getValidName() {
+        return (name == null || name.isBlank()) ? login : name;
     }
 }

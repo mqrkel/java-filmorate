@@ -1,10 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDate;
-import java.util.Set;
+import ru.yandex.practicum.filmorate.validator.ValidMpaName;
 
 @Data
 @Builder
@@ -12,13 +11,11 @@ import java.util.Set;
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"id", "name"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Film {
+public class Mpa {
+
+    @PositiveOrZero(message = "Некорректный ID рейтинга MPA")
     Integer id;
+
+    @ValidMpaName
     String name;
-    String description;
-    LocalDate releaseDate;
-    Integer duration;
-    Mpa mpa;
-    Set<Integer> likeIds;
-    Set<Genre> genres;
 }
