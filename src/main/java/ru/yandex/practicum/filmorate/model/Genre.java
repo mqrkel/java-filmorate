@@ -1,10 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDate;
-import java.util.Set;
 
 @Data
 @Builder
@@ -12,13 +10,8 @@ import java.util.Set;
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"id", "name"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Film {
+public class Genre {
+    @PositiveOrZero
     Integer id;
     String name;
-    String description;
-    LocalDate releaseDate;
-    Integer duration;
-    Mpa mpa;
-    Set<Integer> likeIds;
-    Set<Genre> genres;
 }
